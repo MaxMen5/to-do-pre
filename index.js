@@ -1,4 +1,4 @@
-let items = [
+let items = [ // Список предустановленных задач
 	"Сделать проектную работу",
 	"Полить цветы",
 	"Пройти туториал по Реакту",
@@ -7,29 +7,68 @@ let items = [
 	"Помыть посуду",
 ];
 
-const listElement = document.querySelector(".to-do__list");
-const formElement = document.querySelector(".to-do__form");
-const inputElement = document.querySelector(".to-do__input");
-
-function loadTasks() {
-
+function createItem(item) { // Функция создает новую задачу
+	const template = document.querySelector("#to-do__item-template");
+	const task = template.content.querySelector(".to-do__item").cloneNode(true);
+	const taskList = document.querySelector(".to-do__list");
+	addHandlers(task);
+	task.querySelector(".to-do__item-text").textContent = item;
+	taskList.prepend(task);
+	saveTasks();
 }
 
-function createItem(item) {
-	const template = document.getElementById("to-do__item-template");
-	const clone = template.content.querySelector(".to-do__item").cloneNode(true);
-  const textElement = clone.querySelector(".to-do__item-text");
-  const deleteButton = clone.querySelector(".to-do__item-button_type_delete");
-  const duplicateButton = clone.querySelector(".to-do__item-button_type_duplicate");
-  const editButton = clone.querySelector(".to-do__item-button_type_edit");
+function addHandlers(task) { // Функция добавляет обработчики событий для новой задачи
+	const textElement = task.querySelector(".to-do__item-text");
+	const deleteButton = task.querySelector(".to-do__item-button_type_delete");
+  	const duplicateButton = task.querySelector(".to-do__item-button_type_duplicate");
+  	const editButton = task.querySelector(".to-do__item-button_type_edit");
 
+	deleteButton.addEventListener('click', function() {
+		deleteButton.closest(".to-do__item").remove();
+		saveTasks();
+	});
+
+	duplicateButton.addEventListener('click', function() {
+		const taskText = duplicateButton.closest(".to-do__item").querySelector(".to-do__item-text").textContent;
+		createItem(taskText);
+	});
+
+	editButton.addEventListener('click', function() {
+		const taskText = editButton.closest(".to-do__item").querySelector(".to-do__item-text");
+		taskText.setAttribute('contenteditable', 'true');
+		taskText.focus();
+	});
+
+	textElement.addEventListener('blur', function() {
+		textElement.setAttribute('contenteditable', 'false');
+		saveTasks();
+	});
 }
 
-function getTasksFromDOM() {
-
+function saveTasks() { // Функция сохраняет список задач в localStorage
+	const tasksText = document.querySelectorAll(".to-do__item-text");
+	const tasksList = [];
+	tasksText.forEach((item) => tasksList.unshift(item.textContent));
+	localStorage.setItem('tasks', JSON.stringify(tasksList));
 }
 
-function saveTasks(tasks) {
-
+function loadTasks() { // Функция загружает список задач из localStorage
+	const tasksList = JSON.parse(localStorage.getItem('tasks'));
+	tasksList.forEach((item) => createItem(item));
+	return tasksList.length === 0;
 }
 
+function loadPage() { // Функция загружает страницу при открытии или перезапуске
+	const form = document.querySelector(".to-do__form");
+	const taskInput = document.querySelector(".to-do__input");
+	if (loadTasks()) items.forEach((item) => createItem(item)); // Если в списке нет задач, то загружаем предустановленные
+	form.addEventListener('submit', (event) => {
+		event.preventDefault();
+		if (taskInput.value.length !== 0) {
+			createItem(taskInput.value);
+			form.reset();
+		}
+	});
+}
+
+loadPage(); // Загрузка страницы
