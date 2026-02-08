@@ -54,14 +54,15 @@ function saveTasks() { // Функция сохраняет список зад�
 
 function loadTasks() { // Функция загружает список задач из localStorage
 	const tasksList = JSON.parse(localStorage.getItem('tasks'));
-	tasksList.forEach((item) => createItem(item));
-	return tasksList.length === 0;
+	if (tasksList === null || tasksList.length === 0) items.forEach((item) => createItem(item)); // Если в списке нет задач, то загружаем предустановленные
+	else tasksList.forEach((item) => createItem(item));
 }
 
 function loadPage() { // Функция загружает страницу при открытии или перезапуске
 	const form = document.querySelector(".to-do__form");
 	const taskInput = document.querySelector(".to-do__input");
-	if (loadTasks()) items.forEach((item) => createItem(item)); // Если в списке нет задач, то загружаем предустановленные
+	loadTasks();
+	
 	form.addEventListener('submit', (event) => {
 		event.preventDefault();
 		if (taskInput.value.length !== 0) {
