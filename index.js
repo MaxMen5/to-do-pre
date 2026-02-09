@@ -7,13 +7,17 @@ let items = [ // Список предустановленных задач
 	"Помыть посуду",
 ];
 
-function createItem(item) { // Функция создает новую задачу
+function createItem(item) { // Функция создает template новой задачи
 	const template = document.querySelector("#to-do__item-template");
 	const task = template.content.querySelector(".to-do__item").cloneNode(true);
-	const taskList = document.querySelector(".to-do__list");
 	addHandlers(task);
 	task.querySelector(".to-do__item-text").textContent = item;
-	taskList.prepend(task);
+	return task;
+}
+
+function addTask(taskText) { // Функция добавляет новую задачу
+	const taskList = document.querySelector(".to-do__list");
+	taskList.prepend(createItem(taskText));
 	saveTasks();
 }
 
@@ -30,7 +34,7 @@ function addHandlers(task) { // Функция добавляет обработ
 
 	duplicateButton.addEventListener('click', function() {
 		const taskText = duplicateButton.closest(".to-do__item").querySelector(".to-do__item-text").textContent;
-		createItem(taskText);
+		addTask(taskText);
 	});
 
 	editButton.addEventListener('click', function() {
@@ -54,8 +58,8 @@ function saveTasks() { // Функция сохраняет список зад�
 
 function loadTasks() { // Функция загружает список задач из localStorage
 	const tasksList = JSON.parse(localStorage.getItem('tasks'));
-	if (tasksList === null || tasksList.length === 0) items.forEach((item) => createItem(item)); // Если в списке нет задач, то загружаем предустановленные
-	else tasksList.forEach((item) => createItem(item));
+	if (tasksList === null || tasksList.length === 0) items.forEach((item) => addTask(item)); // Если в списке нет задач, то загружаем предустановленные
+	else tasksList.forEach((item) => addTask(item));
 }
 
 function loadPage() { // Функция загружает страницу при открытии или перезапуске
@@ -66,7 +70,7 @@ function loadPage() { // Функция загружает страницу пр
 	form.addEventListener('submit', (event) => {
 		event.preventDefault();
 		if (taskInput.value.length !== 0) {
-			createItem(taskInput.value);
+			addTask(taskInput.value);
 			form.reset();
 		}
 	});
